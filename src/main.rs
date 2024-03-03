@@ -1,4 +1,5 @@
 extern crate clap;
+use core::ops::Range;
 use std::fs;
 use std::path::PathBuf;
 use clap::{Arg, App};
@@ -16,7 +17,10 @@ fn main() {
   let working_dir = PathBuf::from(matches.value_of("working-dir").unwrap().to_string());
   let output_dir = matches.value_of("output-dir").unwrap().to_string();
   let input = matches.value_of_lossy("input-files-list").unwrap().to_string();
+  let min_chars: usize = matches.value_of("minchar").unwrap().parse().expect("not a number!");
+  let max_chars: usize = matches.value_of("maxchar").unwrap().parse().expect("not a number!");
 
+  let chunk_size_range = min_chars .. max_chars;
   let content = fs::read_to_string(input).unwrap();
   let list_of_files : Vec<&str> = content.split("\n").collect();  
 
@@ -28,7 +32,7 @@ fn main() {
     let relative_path = PathBuf::from(filename);
     let path = working_dir.join(relative_path);
     let full_path = path.to_str().unwrap();   
-    let _ = process_file(&splitter, full_path, &output_dir, "json");
+    let _ = process_file(&splitter, full_path, &output_dir, "json", chunk_size_range.clone());
   } 
 
 }
@@ -59,6 +63,18 @@ fn get_params() -> clap::ArgMatches<'static> {
             .required(true)
             .min_values(1)
             .max_values(1))            
+      .arg(Arg::with_name("minchar")                    
+            .long("minchar")
+            .help("minimum chars in chunk")
+            .required(true)
+            .min_values(1)
+            .max_values(1))
+      .arg(Arg::with_name("maxchar")                    
+            .long("maxchar")
+            .help("maximum chars in chunk")
+            .required(true)
+            .min_values(1)
+            .max_values(1))                        
       .get_matches();
     matches
 }
@@ -71,7 +87,7 @@ fn get_chunks<'a>(splitter: &'a TextSplitter<Tokenizer>, max_characters: std::op
 }
 
 fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>, input_path: &str, 
-                    output: &str, new_extension: &str) -> io::Result<()> {
+                    output: &str, new_extension: &str, chunk_chars_range: Range<usize>) -> io::Result<()> {
 
     // Create a Path from the input_path string.    
     let path = Path::new(input_path);
@@ -90,9 +106,8 @@ fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>, input_path: &str,
     // Read the file's contents into a string.
     let mut content = String::new();    
     input_file.read_to_string(&mut content)?;
-    
-    let max_characters = 500..2000;
-    let chunks = get_chunks(splitter, max_characters, &content);
+        
+    let chunks = get_chunks(splitter, chunk_chars_range, &content);
     
     // Write the contents to the output file.
     let json = json!(chunks.collect::<Vec<_>>());

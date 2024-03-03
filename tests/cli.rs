@@ -10,3 +10,4 @@ fn dies_no_args() {
        .stderr(predicate::str::contains("USAGE"));
     
 }
+
