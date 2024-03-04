@@ -19,12 +19,15 @@ fn main() {
   let input = matches.value_of_lossy("input-files-list").unwrap().to_string();
   let min_chars: usize = matches.value_of("minchar").unwrap().parse().expect("not a number!");
   let max_chars: usize = matches.value_of("maxchar").unwrap().parse().expect("not a number!");
-  assert!(min_chars < max_chars);
-
+  let strip_prfx: &str = matches.value_of("strip-prefix").unwrap_or("");
+  let prfx_replacement: &str = matches.value_of("prefix-replace").unwrap_or("");
   let is_verbose: bool = matches.is_present("verbose");
+
+  assert!(min_chars < max_chars);  
 
   let chunk_size_range = min_chars .. max_chars;
   let content = fs::read_to_string(input).unwrap();
+  
   let list_of_files : Vec<&str> = content.split("\n").collect();
   assert!(list_of_files.len()>0);  
 
@@ -38,7 +41,7 @@ fn main() {
     let full_path = path.to_str().unwrap();   
     let _ = process_file(&splitter, full_path, &output_dir,
                "json", chunk_size_range.clone(),
-               is_verbose);
+               is_verbose, strip_prfx, prfx_replacement);
   } 
 
 }
@@ -87,6 +90,16 @@ fn get_params() -> clap::ArgMatches<'static> {
             .help("verbose output")
             .required(false)
             .takes_value(false))      
+      .arg(Arg::with_name("strip-prefix")
+            .long("strip-prefix")                        
+            .min_values(1)
+            .max_values(1)
+            .help("src prefix to strip"))
+      .arg(Arg::with_name("prefix-replace")
+            .long("prefix-replace")                        
+            .min_values(1)
+            .max_values(1)
+            .help("replacement for src prefix"))            
       .get_matches();
     matches
 }
@@ -100,7 +113,8 @@ fn get_chunks<'a>(splitter: &'a TextSplitter<Tokenizer>, max_characters: std::op
 
 fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>, 
                     input_path: &str, output: &str, new_extension: &str, 
-                    chunk_chars_range: Range<usize>, is_verbose: bool) -> io::Result<()> {
+                    chunk_chars_range: Range<usize>, is_verbose: bool, 
+                    strp_prfx: &str, prfx_replacement: &str) -> io::Result<()> {
 
     if is_verbose {
       println!("processing file {}", &input_path);
@@ -127,11 +141,13 @@ fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>,
             
     let chunks = _chunks.collect::<Vec<_>>();
     let mut json_objects = vec![];
+
+    let src = get_src(strp_prfx, prfx_replacement, input_path);
     
     for s in chunks {
       
       let object = json!({
-        "src": &input_path,
+        "src": src,
         "chunk": s
       });
       json_objects.push(object);
@@ -150,3 +166,23 @@ fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>,
     Ok(())
 }
 
+fn get_src(strp_prfx: &str, prfx_replacement: &str, input_path: &str) -> String {
+  
+    let src = if strp_prfx != "" && prfx_replacement != "" {
+                      format!("{}{}", prfx_replacement, input_path.to_string().strip_prefix(strp_prfx).unwrap())
+                    } 
+                    else {
+                      input_path.to_string()
+                  };
+    src
+}
+
+
+#[test]
+fn test_src() {
+    let input = "/media/user/aiken/pages/p1.md";
+    let strip_prfx = "/media/user/aiken";
+    let replacement = "github.com/aiken";
+
+    assert!(!get_src(strip_prfx, replacement, input).is_empty());
+}
