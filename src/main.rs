@@ -19,10 +19,14 @@ fn main() {
   let input = matches.value_of_lossy("input-files-list").unwrap().to_string();
   let min_chars: usize = matches.value_of("minchar").unwrap().parse().expect("not a number!");
   let max_chars: usize = matches.value_of("maxchar").unwrap().parse().expect("not a number!");
+  assert!(min_chars < max_chars);
+
+  let is_verbose: bool = matches.is_present("verbose");
 
   let chunk_size_range = min_chars .. max_chars;
   let content = fs::read_to_string(input).unwrap();
-  let list_of_files : Vec<&str> = content.split("\n").collect();  
+  let list_of_files : Vec<&str> = content.split("\n").collect();
+  assert!(list_of_files.len()>0);  
 
   let tokenizer = Tokenizer::from_pretrained("bert-base-cased", None).unwrap();  
   let splitter = TextSplitter::new(tokenizer)
@@ -32,7 +36,9 @@ fn main() {
     let relative_path = PathBuf::from(filename);
     let path = working_dir.join(relative_path);
     let full_path = path.to_str().unwrap();   
-    let _ = process_file(&splitter, full_path, &output_dir, "json", chunk_size_range.clone());
+    let _ = process_file(&splitter, full_path, &output_dir,
+               "json", chunk_size_range.clone(),
+               is_verbose);
   } 
 
 }
@@ -75,6 +81,12 @@ fn get_params() -> clap::ArgMatches<'static> {
             .required(true)
             .min_values(1)
             .max_values(1))                        
+      .arg(Arg::with_name("verbose")
+            .short("v")
+            .long("verbose")
+            .help("verbose output")
+            .required(false)
+            .takes_value(false))      
       .get_matches();
     matches
 }
@@ -86,9 +98,13 @@ fn get_chunks<'a>(splitter: &'a TextSplitter<Tokenizer>, max_characters: std::op
     chunks
 }
 
-fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>, input_path: &str, 
-                    output: &str, new_extension: &str, chunk_chars_range: Range<usize>) -> io::Result<()> {
+fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>, 
+                    input_path: &str, output: &str, new_extension: &str, 
+                    chunk_chars_range: Range<usize>, is_verbose: bool) -> io::Result<()> {
 
+    if is_verbose {
+      println!("processing file {}", &input_path);
+    }                  
     // Create a Path from the input_path string.    
     let path = Path::new(input_path);
 
@@ -107,13 +123,29 @@ fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>, input_path: &str,
     let mut content = String::new();    
     input_file.read_to_string(&mut content)?;
         
-    let chunks = get_chunks(splitter, chunk_chars_range, &content);
+    let _chunks = get_chunks(splitter, chunk_chars_range, &content);
+            
+    let chunks = _chunks.collect::<Vec<_>>();
+    let mut json_objects = vec![];
     
-    // Write the contents to the output file.
-    let json = json!(chunks.collect::<Vec<_>>());
+    for s in chunks {
+      
+      let object = json!({
+        "src": &input_path,
+        "chunk": s
+      });
+      json_objects.push(object);
+    }
+
+    let output = serde_json::to_string(&json_objects).unwrap();    
     // Open the output file in write mode.
     let mut output_file = File::create(&output_path)?;
-    output_file.write_all(json.to_string().as_bytes())?;
+
+    if is_verbose {
+      println!("saving output to {:?}", &output_file);
+    }
+    // Write the contents to the output file.
+    output_file.write_all(output.as_bytes())?;
 
     Ok(())
 }
