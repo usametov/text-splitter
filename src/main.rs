@@ -6,7 +6,7 @@ use clap::{Arg, App};
 use text_splitter::TextSplitter;
 use tokenizers::Tokenizer;
 use std::fs::File;
-use std::io::{self, Read, Write};
+use std::io::{self, Write};
 use std::path::Path;
 use serde_json::json;
 
@@ -130,12 +130,7 @@ fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>,
     let output_path = output_dir.join(filename)
                                          .with_extension(new_extension);
 
-    // Open the file in read-only mode.
-    let mut input_file = File::open(&input_path)?;
-
-    // Read the file's contents into a string.
-    let mut content = String::new();    
-    input_file.read_to_string(&mut content)?;
+    let content = fs::read_to_string(&input_path)?;
         
     let _chunks = get_chunks(splitter, chunk_chars_range, &content);
             
@@ -144,8 +139,7 @@ fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>,
 
     let src = get_src(strp_prfx, prfx_replacement, input_path);
     
-    for s in chunks {
-      
+    for s in chunks {      
       let object = json!({
         "src": src,
         "chunk": s
