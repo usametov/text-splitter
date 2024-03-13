@@ -1,5 +1,6 @@
 use std::{fs, path::PathBuf};
-use clap::{App, Arg, Error};
+use std::error::Error;
+use clap::{App, Arg};
 
 #[derive(Debug)]
 pub struct Config {
@@ -14,7 +15,7 @@ pub struct Config {
     pub is_verbose: bool
 }
 
-pub fn get_args() -> Result<Config, Error> { 
+pub fn get_args() -> Result<Config, Box<dyn Error>> { 
 
     let matches = App::new("semantic splitter")
       .version("0.1")
