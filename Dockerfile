@@ -6,4 +6,4 @@ COPY ./ ./
 RUN cargo build --release & rm src/*.rs
 
 # Run the binary
-# CMD ["./target/release/text-splitter"] --input-files /media/user777/ssd/aiken/files2process.txt --dir  /media/user777/ssd/aiken/aiken-lang-docs/src/ -o /media/user777/ssd/aiken/aiken-docs-processed/ --minchar 200 --maxchar 700 -v
+# CMD ["./target/release/text-splitter"] --input-files /data/files2process.txt --dir  /data/aiken/aiken-lang-docs/src/ -o /data/aiken/aiken-docs-processed/ --minchar 200 --maxchar 700 -v

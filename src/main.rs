@@ -73,9 +73,10 @@ fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>,
 
     let src = get_src(strp_prfx, prfx_replacement, input_path);
     
-    for s in chunks {      
+    for (index, &s) in chunks.iter().enumerate() {      
       let object = json!({
         "src": src,
+        "seq_id": index,
         "chunk": s
       });
       json_objects.push(object);
