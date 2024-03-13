@@ -2,7 +2,7 @@ extern crate clap;
 use core::ops::Range;
 use std::fs;
 use std::path::PathBuf;
-use clap::{Arg, App};
+
 use text_splitter::TextSplitter;
 use tokenizers::Tokenizer;
 use std::fs::File;
@@ -10,25 +10,15 @@ use std::io::{self, Write};
 use std::path::Path;
 use serde_json::json;
 
+mod config;
+
 fn main() {
 
-  let matches = get_params();
+  let cfg = config::get_args().expect("Could not read config");  
+  assert!(cfg.min_chars < cfg.max_chars);  
 
-  let working_dir = PathBuf::from(matches.value_of("working-dir").unwrap().to_string());
-  let output_dir = matches.value_of("output-dir").unwrap().to_string();
-  let input = matches.value_of_lossy("input-files-list").unwrap().to_string();
-  let min_chars: usize = matches.value_of("minchar").unwrap().parse().expect("not a number!");
-  let max_chars: usize = matches.value_of("maxchar").unwrap().parse().expect("not a number!");
-  let strip_prfx: &str = matches.value_of("strip-prefix").unwrap_or("");
-  let prfx_replacement: &str = matches.value_of("prefix-replace").unwrap_or("");
-  let is_verbose: bool = matches.is_present("verbose");
-
-  assert!(min_chars < max_chars);  
-
-  let chunk_size_range = min_chars .. max_chars;
-  let content = fs::read_to_string(input).unwrap();
-  
-  let list_of_files : Vec<&str> = content.split("\n").collect();
+  let chunk_size_range = cfg.min_chars .. cfg.max_chars;    
+  let list_of_files = cfg.input_files; 
   assert!(list_of_files.len()>0);  
 
   let tokenizer = Tokenizer::from_pretrained("bert-base-cased", None).unwrap();  
@@ -37,74 +27,18 @@ fn main() {
         
   for filename in list_of_files {
     let relative_path = PathBuf::from(filename);
-    let path = working_dir.join(relative_path);
+    let path = cfg.working_dir.join(relative_path);
     let full_path = path.to_str().unwrap();   
-    let _ = process_file(&splitter, full_path, &output_dir,
+    let _ = process_file(&splitter, full_path, &cfg.output_dir,
                "json", chunk_size_range.clone(),
-               is_verbose, strip_prfx, prfx_replacement);
+               cfg.is_verbose, cfg.strip_prefix.as_str(), cfg.prfx_replacement.as_str());
   } 
 
 }
 
-fn get_params() -> clap::ArgMatches<'static> {
-    let matches = App::new("semantic splitter")
-      .version("0.1")
-      .author("Ulan Sametov <usametov@gmail.com>")
-      .about("performs semantic split")  
-      .arg(Arg::with_name("input-files-list")        
-            .short("i") 
-            .long("input-files")
-            .help("file containing list of relative paths to documents to process")
-            .required(true)
-            .min_values(1)
-            .max_values(1))
-      .arg(Arg::with_name("working-dir")        
-            .short("d")
-            .long("dir")
-            .help("working directory")
-            .required(true)
-            .min_values(1)
-            .max_values(1))
-      .arg(Arg::with_name("output-dir")        
-            .short("o")
-            .long("output-dir")
-            .help("output directory")
-            .required(true)
-            .min_values(1)
-            .max_values(1))            
-      .arg(Arg::with_name("minchar")                    
-            .long("minchar")
-            .help("minimum chars in chunk")
-            .required(true)
-            .min_values(1)
-            .max_values(1))
-      .arg(Arg::with_name("maxchar")                    
-            .long("maxchar")
-            .help("maximum chars in chunk")
-            .required(true)
-            .min_values(1)
-            .max_values(1))                        
-      .arg(Arg::with_name("verbose")
-            .short("v")
-            .long("verbose")
-            .help("verbose output")
-            .required(false)
-            .takes_value(false))      
-      .arg(Arg::with_name("strip-prefix")
-            .long("strip-prefix")                        
-            .min_values(1)
-            .max_values(1)
-            .help("src prefix to strip"))
-      .arg(Arg::with_name("prefix-replace")
-            .long("prefix-replace")                        
-            .min_values(1)
-            .max_values(1)
-            .help("replacement for src prefix"))            
-      .get_matches();
-    matches
-}
-
-fn get_chunks<'a>(splitter: &'a TextSplitter<Tokenizer>, max_characters: std::ops::Range<usize>, txt: &'a str) -> impl Iterator<Item = &'a str> {
+fn get_chunks<'a>(splitter: &'a TextSplitter<Tokenizer>, 
+                  max_characters: std::ops::Range<usize>, 
+                  txt: &'a str) -> impl Iterator<Item = &'a str> {
     
     // Optionally can also have the splitter trim whitespace for you    
     let chunks = splitter.chunks(txt, max_characters);
