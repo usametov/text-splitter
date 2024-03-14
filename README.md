@@ -21,5 +21,5 @@ https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials
 How to run this in docker:
 
 ```
-docker run -v ~/codeDocuments/data/:/container/directory -it your-docker-image
+docker run -v ~/Documents/data:/data -it text-splitter
 ```
