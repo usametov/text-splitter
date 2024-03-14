@@ -16,10 +16,9 @@ This notebook effectively visualizes this concept:
 https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb
 
 
+Certainly, we'll need to experiment with various values for the parameters of minimum and maximum characters. That's the reason we aim to utilize a Docker image to execute this as an element of our MLOps workflow.
 
-
-How to run this in docker:
-
+Here's the command to run this in Docker:
 ```
 docker run -v ~/Documents/data:/data -it text-splitter
 ```
