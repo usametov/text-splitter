@@ -9,9 +9,8 @@ RUN apt update && apt install -y pkg-config libssl-dev g++ && rm -rf /var/lib/ap
 # Build 
 RUN cargo build --release 
 # Run the binary
-#ENTRYPOINT ./target/release/text-splitter
 CMD ["./target/release/text-splitter"]
-#RUN find . | grep text-splitter
+
 
 
 
