@@ -113,5 +113,5 @@ fn test_src() {
     let strip_prfx = "/media/user/aiken";
     let replacement = "github.com/aiken";
 
-    assert!(!get_src(strip_prfx, replacement, input).is_empty());
+    assert_eq!(get_src(strip_prfx, replacement, input), "github.com/aiken/pages/p1.md");
 }
