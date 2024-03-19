@@ -106,9 +106,10 @@ fn get_src(strp_prfx: &str, prfx_replacement: &str, input_path: &str) -> String 
     src
 }
 
-
+//the idea is that we may want to strip the part of path and replace it with something else
+//for example, you do not want to show the name of your home directory 
 #[test]
-fn test_src() {
+fn test_src() {    
     let input = "/media/user/aiken/pages/p1.md";
     let strip_prfx = "/media/user/aiken";
     let replacement = "github.com/aiken";
