@@ -20,5 +20,6 @@ Certainly, we'll need to experiment with various values for the parameters of mi
 
 Here's the command to run this in Docker:
 ```
-docker run -v ~/Documents/data:/data -it text-splitter --minchar 200 --maxchar 500 --input-files data/files2process.txt --dir ./data -o ./data/output -v
+docker run -v /home/user777/code/rust/text-splitter/tests:/data -it 4c1e9e60bc63 /target/release/text-splitter --minchar 200 --maxchar 500 --input-files /data/inputs/files2process.txt --dir /data/inputs -o /data/outputs
+
 ```
