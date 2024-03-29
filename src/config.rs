@@ -85,7 +85,7 @@ pub fn get_args() -> Result<Config, Box<dyn Error>> {
         strip_prefix: matches.value_of("strip-prefix").unwrap_or("").to_string(),
         prfx_replacement: matches.value_of("prefix-replace").unwrap_or("").to_string(),
         is_verbose: matches.is_present("verbose"),
-        input_files: content.split("\n").map(|s| s.to_string()).collect()    
+        input_files: content.split('\n').map(|s| s.to_string()).collect()    
       })
 
 }

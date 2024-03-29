@@ -19,7 +19,7 @@ fn main() {
 
   let chunk_size_range = cfg.min_chars .. cfg.max_chars;    
   let list_of_files = cfg.input_files; 
-  assert!(list_of_files.len()>0);  
+  assert!(!list_of_files.is_empty());  
 
   let tokenizer = Tokenizer::from_pretrained("bert-base-cased", None).unwrap();  
   let splitter = TextSplitter::new(tokenizer)
@@ -45,7 +45,7 @@ fn get_chunks<'a>(splitter: &'a TextSplitter<Tokenizer>,
     chunks
 }
 
-fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>, 
+fn process_file(splitter: &TextSplitter<Tokenizer>, 
                     input_path: &str, output: &str, new_extension: &str, 
                     chunk_chars_range: Range<usize>, is_verbose: bool, 
                     strp_prfx: &str, prfx_replacement: &str) -> io::Result<()> {
@@ -64,7 +64,7 @@ fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>,
     let output_path = output_dir.join(filename)
                                          .with_extension(new_extension);
 
-    let content = fs::read_to_string(&input_path)?;
+    let content = fs::read_to_string(input_path)?;
         
     let _chunks = get_chunks(splitter, chunk_chars_range, &content);
             
@@ -84,7 +84,7 @@ fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>,
 
     let output = serde_json::to_string(&json_objects).unwrap();    
     // Open the output file in write mode.
-    let mut output_file = File::create(&output_path)?;
+    let mut output_file = File::create(output_path)?;
 
     if is_verbose {
       println!("saving output to {:?}", &output_file);
@@ -97,13 +97,12 @@ fn process_file<'a>(splitter: &'a TextSplitter<Tokenizer>,
 
 fn get_src(strp_prfx: &str, prfx_replacement: &str, input_path: &str) -> String {
   
-    let src = if strp_prfx != "" && prfx_replacement != "" {
+    if !strp_prfx.is_empty() && !prfx_replacement.is_empty() {
                       format!("{}{}", prfx_replacement, input_path.to_string().strip_prefix(strp_prfx).unwrap())
                     } 
                     else {
                       input_path.to_string()
-                  };
-    src
+                  }    
 }
 
 //the idea is that we may want to strip the part of path and replace it with something else
