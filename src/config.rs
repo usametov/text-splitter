@@ -78,8 +78,8 @@ pub fn get_args() -> Result<Config, Box<dyn Error>> {
       Ok(Config{
         working_dir : PathBuf::from(matches.value_of("working-dir").unwrap()),
         output_dir : matches.value_of("output-dir").unwrap().to_string(),
-        min_chars : matches.value_of("minchar").unwrap().parse().expect("not a number!"),
-        max_chars:  matches.value_of("maxchar").unwrap().parse().expect("not a number!"),
+        min_chars : matches.value_of("minchar").map(parse_positive_int).unwrap()?,
+        max_chars:  matches.value_of("maxchar").map(parse_positive_int).unwrap()?,
         strip_prefix: matches.value_of("strip-prefix").unwrap_or("").to_string(),
         prfx_replacement: matches.value_of("prefix-replace").unwrap_or("").to_string(),
         is_verbose: matches.is_present("verbose"),
@@ -88,7 +88,25 @@ pub fn get_args() -> Result<Config, Box<dyn Error>> {
 
 }
 
-#[test]
-fn test_args() {
-
+fn parse_positive_int(val: &str) -> Result<usize, Box<dyn Error>>{
+      match val.parse() {
+            Ok(n) if n>0 => Ok(n),
+            _ => Err(From::from(val)),
+      }
 }
+
+#[test]
+fn test_parse_positive_int() {
+      let res = parse_positive_int("1");
+      assert!(res.is_ok());
+      assert_eq!(res.unwrap(), 1);
+
+      let res = parse_positive_int("no");
+      assert!(res.is_err());
+      assert_eq!(res.unwrap_err().to_string(), "no".to_string());
+
+      let res = parse_positive_int("0");
+      assert!(res.is_err());
+      assert_eq!(res.unwrap_err().to_string(), "0".to_string());
+}
+
