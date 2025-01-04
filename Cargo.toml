@@ -11,6 +11,7 @@ text-splitter = { version = "0.6", features = ["tokenizers"] }
 tokenizers = { version = "0.15", features = ["http"] }
 serde_json = "1.0"
 axum = "0.8.0"
+tokio =  { version = "1.42.0", features = ["full"] }
 
 [dev-dependencies]
 assert_cmd = "2.0.14"

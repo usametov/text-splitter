@@ -21,6 +21,13 @@ fn main() {
   let list_of_files = cfg.input_files; 
   assert!(!list_of_files.is_empty());  
 
+  //TODO: create 
+  // let app = Router::new().route("/", get(calc_chunks));
+          
+  // let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+  //  axum::serve(listener, app).await.unwrap();
+
+  //TODO: move this to separate file  
   let tokenizer = Tokenizer::from_pretrained("bert-base-cased", None).unwrap();  
   let splitter = TextSplitter::new(tokenizer)
     .with_trim_chunks(true);
