@@ -37,5 +37,17 @@ fn runs_with_strip() {
 
 }
 
+#[test]
+fn runs_with_strip_current_dir() {
+    let mut cmd = Command::cargo_bin("text-splitter").unwrap();
+
+    cmd.args(["--input-files", "tests/inputs/files2process.txt", 
+                "--dir", "tests/inputs/", "-o", "tests/outputs/", 
+                "--minchar", "200", "--maxchar", "500"
+                , "--strip-prefix", "tests/inputs/"
+                , "--prefix-replace", "https://aiken-lang.org/" ]).assert().success();        
+
+}
+
 
 
