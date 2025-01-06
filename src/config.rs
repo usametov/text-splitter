@@ -12,7 +12,8 @@ pub struct Config {
     pub max_chars: usize,
     pub strip_prefix: String,
     pub prfx_replacement: String,
-    pub is_verbose: bool
+    pub is_verbose: bool,
+    pub web: bool
 }
 
 pub fn get_args() -> Result<Config, Box<dyn Error>> { 
@@ -71,7 +72,13 @@ pub fn get_args() -> Result<Config, Box<dyn Error>> {
             .long("prefix-replace")                        
             .min_values(1)
             .max_values(1)
-            .help("replacement for src prefix"))            
+            .help("replacement for src prefix"))
+      .arg(Arg::with_name("web")
+            .short("w")
+            .long("web")
+            .help("run web server")
+            .required(false)
+            .takes_value(false))            
       .get_matches();
 
       let input = matches.value_of_lossy("input-files-list").expect("input files list not provided!");
@@ -85,7 +92,8 @@ pub fn get_args() -> Result<Config, Box<dyn Error>> {
         strip_prefix: matches.value_of("strip-prefix").unwrap_or("").to_string(),
         prfx_replacement: matches.value_of("prefix-replace").unwrap_or("").to_string(),
         is_verbose: matches.is_present("verbose"),
-        input_files: content.split('\n').map(|s| s.to_string()).collect()    
+        input_files: content.split('\n').map(|s| s.to_string()).collect(),
+        web: matches.is_present("web")      
       })
 
 }
