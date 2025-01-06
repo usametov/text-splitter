@@ -3,17 +3,28 @@ extern crate clap;
 mod config;
 mod processor;
 
+use serde::Deserialize;
 use axum::{
   routing::post,
   Router,
+  extract::State,
+  Json
 };
 use std::net::SocketAddr;
 use tokio;
+use std::sync::Arc;
+use std::fs;
 
-async fn run(list_of_files: Vec<String>, cfg: &config::Config) {
+#[derive(Deserialize)]
+struct PostParams {
+  list_of_files: Vec<String> 
+}
+
+async fn run(State(cfg): State<Arc<config::Config>>, 
+             Json(payload): Json<PostParams>) {
 
   processor::run(
-    list_of_files,
+    payload.list_of_files,
     cfg.working_dir.clone(),
     cfg.output_dir.as_str(),
     cfg.min_chars .. cfg.max_chars,
@@ -28,17 +39,24 @@ async fn main() {
   let cfg = config::get_args().expect("Could not read config");  
   assert!(cfg.min_chars < cfg.max_chars); 
   
-  let list_of_files = cfg.input_files;
-  assert!(cfg.web || !list_of_files.is_empty());
-
-  if(cfg.web) {
+  let input_file = cfg.input_files.clone();
+  
+  if cfg.web {
     // Create the Axum router
-    //let app = Router::new().route("/v1/run", post(run));
+    let app = Router::new()
+                                        .route("/v1/run", post(run))
+                                        .with_state(Arc::new(cfg));
  
     // Start the Axum server  
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
-    //axum::serve(listener, app).await.unwrap();
+    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
+    axum::serve(listener, app).await.unwrap();
   } else {
+
+    let content = fs::read_to_string(input_file).unwrap();      
+    let list_of_files: Vec<_> = content.split('\n').map(|s| s.to_string()).collect();
+    assert!(!list_of_files.is_empty());
+
     processor::run(list_of_files, cfg.working_dir
                , cfg.output_dir.as_str() 
                , cfg.min_chars .. cfg.max_chars

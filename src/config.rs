@@ -1,13 +1,13 @@
-use std::{fs, path::PathBuf};
+use std::path::PathBuf;
 use std::error::Error;
 use clap::{App, Arg};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Config {
 
     pub working_dir: PathBuf,
     pub output_dir: String,    
-    pub input_files: Vec<String>,    
+    pub input_files: String,    
     pub min_chars: usize,
     pub max_chars: usize,
     pub strip_prefix: String,
@@ -81,9 +81,6 @@ pub fn get_args() -> Result<Config, Box<dyn Error>> {
             .takes_value(false))            
       .get_matches();
 
-      let input = matches.value_of_lossy("input-files-list").expect("input files list not provided!");
-      let content = fs::read_to_string(input.trim())?;      
-  
       Ok(Config{
         working_dir : PathBuf::from(matches.value_of("working-dir").unwrap()),
         output_dir : matches.value_of("output-dir").unwrap().to_string(),
@@ -92,7 +89,7 @@ pub fn get_args() -> Result<Config, Box<dyn Error>> {
         strip_prefix: matches.value_of("strip-prefix").unwrap_or("").to_string(),
         prfx_replacement: matches.value_of("prefix-replace").unwrap_or("").to_string(),
         is_verbose: matches.is_present("verbose"),
-        input_files: content.split('\n').map(|s| s.to_string()).collect(),
+        input_files: matches.value_of_lossy("input-files-list").expect("input files list not provided!").to_string(),
         web: matches.is_present("web")      
       })
 
