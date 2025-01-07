@@ -4,12 +4,14 @@ mod config;
 mod processor;
 
 use serde::Deserialize;
+use serde_json::{json, Value};
 use axum::{
   routing::post,
   Router,
   extract::State,
   Json
 };
+use anyhow::Context;
 use std::net::SocketAddr;
 use tokio;
 use std::sync::Arc;
@@ -21,7 +23,8 @@ struct PostParams {
 }
 
 async fn run(State(cfg): State<Arc<config::Config>>, 
-             Json(payload): Json<PostParams>) {
+             Json(payload): Json<PostParams>) 
+             -> Json<Value> {
 
   processor::run(
     payload.list_of_files,
@@ -30,7 +33,15 @@ async fn run(State(cfg): State<Arc<config::Config>>,
     cfg.min_chars .. cfg.max_chars,
     cfg.is_verbose,
     cfg.prfx_replacement.as_str(),
-    cfg.strip_prefix.as_str())
+    cfg.strip_prefix.as_str());
+
+    let body = Json(json!({
+      "result": {
+        "success": true
+      }
+    }));
+   
+   body
 }
 
 #[tokio::main]
@@ -50,7 +61,12 @@ async fn main() {
     // Start the Axum server  
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    
+    println!("->> LISTENING on {:?}\n", listener.local_addr());
+    axum::serve(listener, app)
+         .await.context("axum serve failed")
+         .unwrap();
+    
   } else {
 
     let content = fs::read_to_string(input_file).unwrap();      
@@ -61,8 +77,9 @@ async fn main() {
                , cfg.output_dir.as_str() 
                , cfg.min_chars .. cfg.max_chars
                , cfg.is_verbose, cfg.prfx_replacement.as_str()
-               , cfg.strip_prefix.as_str())   
-  }
-  
+               , cfg.strip_prefix.as_str());
+    
+  };
+     
 }
 

@@ -3,3 +3,4 @@ target
 .history
 
 .aider*
+tests/outputs/*

@@ -23,3 +23,15 @@ Here's the command to run this in Docker:
 docker run -v /home/user777/code/rust/text-splitter/tests:/data <image-name> /target/release/text-splitter --minchar 200 --maxchar 500 --input-files /data/inputs/files2process.txt --dir /data/inputs -o /data
 
 ```
+
+To run web server from command line:
+```
+cargo run -- --minchar 200 --maxchar 500 --input-files nah --dir /data/inputs -o /data -w
+```
+
+To run web server in Docker:
+
+```
+docker run -v /home/user777/code/rust/text-splitter/tests:/data <image-name> /target/release/text-splitter --minchar 200 --maxchar 500 --input-files nah --dir /data/inputs -o /data -w
+```
+

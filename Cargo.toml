@@ -13,6 +13,8 @@ serde_json = "1.0"
 axum = "0.8.0"
 tokio =  { version = "1.42.0", features = ["full"] }
 serde = "1.0.217"
+anyhow = "1.0.95"
+httpc-test = "0.1.10"
 
 [dev-dependencies]
 assert_cmd = "2.0.14"

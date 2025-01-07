@@ -49,5 +49,13 @@ fn runs_with_strip_current_dir() {
 
 }
 
+//#[test]
+fn start_webserver() {
 
+    let mut cmd = Command::cargo_bin("text-splitter").unwrap();
+    
+    cmd.args(["--dir", "tests/inputs/", "-o", "tests/outputs/", 
+              "--minchar", "200", "--maxchar", "500",
+              "-w" ]).assert().success();
+}
 

@@ -26,8 +26,8 @@ pub fn get_args() -> Result<Config, Box<dyn Error>> {
             .short("i") 
             .long("input-files")
             .help("file containing list of relative paths to documents to process")
-            .required(true)
-            .min_values(1)
+            .required(false)
+            .min_values(0)
             .max_values(1))
       .arg(Arg::with_name("working-dir")        
             .short("d")
@@ -89,7 +89,7 @@ pub fn get_args() -> Result<Config, Box<dyn Error>> {
         strip_prefix: matches.value_of("strip-prefix").unwrap_or("").to_string(),
         prfx_replacement: matches.value_of("prefix-replace").unwrap_or("").to_string(),
         is_verbose: matches.is_present("verbose"),
-        input_files: matches.value_of_lossy("input-files-list").expect("input files list not provided!").to_string(),
+        input_files: matches.value_of("input-files-list").unwrap_or("").to_string(),
         web: matches.is_present("web")      
       })
 
