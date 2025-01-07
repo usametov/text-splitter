@@ -26,22 +26,19 @@ async fn run(State(cfg): State<Arc<config::Config>>,
              Json(payload): Json<PostParams>) 
              -> Json<Value> {
 
-  processor::run(
-    payload.list_of_files,
-    cfg.working_dir.clone(),
-    cfg.output_dir.as_str(),
-    cfg.min_chars .. cfg.max_chars,
-    cfg.is_verbose,
-    cfg.prfx_replacement.as_str(),
-    cfg.strip_prefix.as_str());
+    let result = processor::run(
+                                          payload.list_of_files,
+                                          cfg.working_dir.clone(),
+                                          cfg.output_dir.as_str(),
+                                          cfg.min_chars .. cfg.max_chars,
+                                          cfg.is_verbose,
+                                          cfg.prfx_replacement.as_str(),
+                                          cfg.strip_prefix.as_str());
 
-    let body = Json(json!({
-      "result": {
-        "success": true
-      }
-    }));
-   
-   body
+    match result {
+      Ok(_) => Json(json!({ "result": { "success": true } })),
+      Err(e) => Json(json!({ "result": { "success": false, "error": e.to_string() } })),
+    }
 }
 
 #[tokio::main]

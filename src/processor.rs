@@ -85,7 +85,7 @@ pub(crate) fn run(list_of_files: Vec<String>
     , chunk_size_range: Range<usize>
     , is_verbose: bool
     , prfx_replacement: &str
-    , strip_prefix: &str) {
+    , strip_prefix: &str) -> Result<(), anyhow::Error> {
   
   let tokenizer = Tokenizer::from_pretrained("bert-base-cased", None).unwrap();  
   let splitter = TextSplitter::new(tokenizer)
@@ -95,10 +95,12 @@ pub(crate) fn run(list_of_files: Vec<String>
     let relative_path = PathBuf::from(filename);
     let path = working_dir.join(relative_path);
     let full_path = path.to_str().unwrap();   
-    let _ = process_file(&splitter, full_path, &output_dir,
+      process_file(&splitter, full_path, &output_dir,
                "json", chunk_size_range.clone(),
-               is_verbose, strip_prefix, prfx_replacement);
+               is_verbose, strip_prefix, prfx_replacement)?;
   }
+
+  Ok(())
 } 
 
 //the idea is that we may want to strip the part of path and replace it with something else

@@ -13,6 +13,14 @@ async fn run_chunking() -> Result<()> {
             "example--gift-card.mdx"
         ]}),
 	);
-	req_chunking.await?.print().await?;
-	Ok(())
+
+	let response = req_chunking.await?;
+    response.print().await?;
+
+    // Check the response body for success
+    let body = response.json_body()?;
+    assert_eq!(body["result"]["success"], true);
+
+    Ok(())
+
 }
