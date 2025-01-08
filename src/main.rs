@@ -58,7 +58,7 @@ async fn main() {
     // Start the Axum server  
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
-    
+
     println!("->> LISTENING on {:?}\n", listener.local_addr());
     axum::serve(listener, app)
          .await.context("axum serve failed")
@@ -70,7 +70,7 @@ async fn main() {
     let list_of_files: Vec<_> = content.split('\n').map(|s| s.to_string()).collect();
     assert!(!list_of_files.is_empty());
 
-    processor::run(list_of_files, cfg.working_dir
+    let _ = processor::run(list_of_files, cfg.working_dir
                , cfg.output_dir.as_str() 
                , cfg.min_chars .. cfg.max_chars
                , cfg.is_verbose, cfg.prfx_replacement.as_str()

@@ -49,7 +49,8 @@ fn runs_with_strip_current_dir() {
 
 }
 
-//#[test]
+#[test]
+#[ignore]
 fn start_webserver() {
 
     let mut cmd = Command::cargo_bin("text-splitter").unwrap();
