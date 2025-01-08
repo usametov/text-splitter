@@ -42,37 +42,43 @@ async fn run(State(cfg): State<Arc<config::Config>>,
     }
 }
 
+fn validate_config(cfg: &config::Config) {
+  // Validate chunk size range
+  assert!(cfg.min_chars < cfg.max_chars, "min_chars must be less than max_chars");
+  
+  // Validate working_dir
+  assert!(
+      cfg.working_dir.exists(),
+      "Working directory does not exist: {:?}",
+      cfg.working_dir
+  );
+  assert!(
+      cfg.working_dir.is_dir(),
+      "Working directory is not a directory: {:?}",
+      cfg.working_dir
+  );
+
+  // Validate output_dir
+  let output_dir = PathBuf::from(&cfg.output_dir);
+  println!("Output directory absolute path: {:?}", output_dir.canonicalize());
+  assert!(
+      output_dir.exists(),
+      "Output directory does not exist: {:?}",
+      output_dir
+  );
+  assert!(
+      output_dir.is_dir(),
+      "Output directory is not a directory: {:?}",
+      output_dir
+  );
+}
+
 #[tokio::main]
 async fn main() {
 
   let cfg = config::get_args().expect("Could not read config");  
-  assert!(cfg.min_chars < cfg.max_chars); 
-   // Validate working_dir
-  assert!(
-    cfg.working_dir.exists(),
-    "Working directory does not exist: {:?}",
-    cfg.working_dir
-    );
-  assert!(
-        cfg.working_dir.is_dir(),
-        "Working directory is not a directory: {:?}",
-        cfg.working_dir
-    );
-
-    // Validate output_dir
-  let output_dir = PathBuf::from(&cfg.output_dir);
-  println!("Output directory absolute path: {:?}", output_dir.canonicalize());
-  assert!(
-        output_dir.exists(),
-        "Output directory does not exist: {:?}",
-        output_dir
-    );
-  assert!(
-        output_dir.is_dir(),
-        "Output directory is not a directory: {:?}",
-        output_dir
-  );
-
+  validate_config(&cfg);
+  
   let input_file = cfg.input_files.clone();
   
   if cfg.web {
