@@ -13,6 +13,7 @@ use axum::{
 };
 use anyhow::Context;
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use tokio;
 use std::sync::Arc;
 use std::fs;
@@ -46,14 +47,39 @@ async fn main() {
 
   let cfg = config::get_args().expect("Could not read config");  
   assert!(cfg.min_chars < cfg.max_chars); 
-  
+   // Validate working_dir
+  assert!(
+    cfg.working_dir.exists(),
+    "Working directory does not exist: {:?}",
+    cfg.working_dir
+    );
+  assert!(
+        cfg.working_dir.is_dir(),
+        "Working directory is not a directory: {:?}",
+        cfg.working_dir
+    );
+
+    // Validate output_dir
+  let output_dir = PathBuf::from(&cfg.output_dir);
+  println!("Output directory absolute path: {:?}", output_dir.canonicalize());
+  assert!(
+        output_dir.exists(),
+        "Output directory does not exist: {:?}",
+        output_dir
+    );
+  assert!(
+        output_dir.is_dir(),
+        "Output directory is not a directory: {:?}",
+        output_dir
+  );
+
   let input_file = cfg.input_files.clone();
   
   if cfg.web {
     // Create the Axum router
     let app = Router::new()
-                                        .route("/v1/run", post(run))
-                                        .with_state(Arc::new(cfg));
+                    .route("/v1/run", post(run))
+                    .with_state(Arc::new(cfg));
  
     // Start the Axum server  
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));

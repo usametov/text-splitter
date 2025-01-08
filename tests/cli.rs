@@ -16,8 +16,8 @@ fn dies_no_args() {
 #[test]
 fn runs_nostrip() {
     let mut cmd = Command::cargo_bin("text-splitter").unwrap();
-    cmd.args(["--input-files", "tests/inputs/files2process.txt", 
-            "--dir", "tests/inputs/", "-o", "tests/outputs/", 
+    cmd.args(["--input-files", "./tests/inputs/files2process.txt", 
+            "--dir", "./tests/inputs/", "-o", "./tests/outputs/", 
             "--minchar", "400", "--maxchar", "1200", "-v"]).assert().success();
 }
     
