@@ -15,6 +15,9 @@ tokio =  { version = "1.42.0", features = ["full"] }
 serde = "1.0.217"
 anyhow = "1.0.95"
 httpc-test = "0.1.10"
+tracing = "0.1.41"
+tracing-log = "0.2.0"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 
 [dev-dependencies]
 assert_cmd = "2.0.14"

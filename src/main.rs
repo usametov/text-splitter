@@ -2,6 +2,8 @@ extern crate clap;
 
 mod config;
 mod processor;
+use tracing::{info, instrument /*, error */};
+use tracing_subscriber::{fmt, EnvFilter};
 
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -23,9 +25,17 @@ struct PostParams {
   list_of_files: Vec<String> 
 }
 
+#[instrument(skip(cfg, payload), fields(
+  num_files = payload.list_of_files.len(),
+  working_dir = %cfg.working_dir.display(),
+  output_dir = %cfg.output_dir,
+  chunk_range = format!("{}..{}", cfg.min_chars, cfg.max_chars)
+))]
 async fn run(State(cfg): State<Arc<config::Config>>, 
              Json(payload): Json<PostParams>) 
              -> Json<Value> {
+
+    info!("Starting processing of files");
 
     let result = processor::run(
                                           payload.list_of_files,
@@ -75,6 +85,12 @@ fn validate_config(cfg: &config::Config) {
 
 #[tokio::main]
 async fn main() {
+
+  fmt().with_env_filter(EnvFilter::from_default_env()
+       .add_directive("text-splitter=info".parse().unwrap()))
+       .init();
+
+  info!("Starting application");
 
   let cfg = config::get_args().expect("Could not read config");  
   validate_config(&cfg);
