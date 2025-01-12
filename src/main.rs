@@ -86,6 +86,8 @@ fn validate_config(cfg: &config::Config) {
 #[tokio::main]
 async fn main() {
 
+  dotenv::dotenv().expect("Failed to read .env file");
+
   fmt().with_writer(std::io::stdout) // Log to console
        .with_env_filter(EnvFilter::from_default_env()
        .add_directive("text-splitter=info".parse().unwrap()))
@@ -104,8 +106,13 @@ async fn main() {
                     .route("/v1/run", post(run))
                     .with_state(Arc::new(cfg));
  
+    let port = std::env::var("WEB_PORT")
+                      .unwrap_or("8080".to_string())
+                      .parse::<u16>()
+                      .expect("Invalid port number");
+
     // Start the Axum server  
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
 
     println!("->> LISTENING on {:?}\n", listener.local_addr());

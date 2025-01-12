@@ -12,7 +12,6 @@ fn dies_no_args() {
     
 }
 
-
 #[test]
 fn runs_nostrip() {
     let mut cmd = Command::cargo_bin("text-splitter").unwrap();
@@ -20,7 +19,15 @@ fn runs_nostrip() {
             "--dir", "./tests/inputs/", "-o", "./tests/outputs/", 
             "--minchar", "400", "--maxchar", "1200", "-v"]).assert().success();
 }
-    
+
+#[test]
+fn runs_no_minmax_chars() {
+    //when minchar and maxchar are not supplied, we use default values, 100 and 500 chars.
+    let mut cmd = Command::cargo_bin("text-splitter").unwrap();
+    cmd.args(["--input-files", "./tests/inputs/files2process.txt", 
+            "--dir", "./tests/inputs/", "-o", "./tests/outputs/", "-v"]).assert().success();
+}
+
 #[test]
 #[ignore]
 fn runs_with_strip() {

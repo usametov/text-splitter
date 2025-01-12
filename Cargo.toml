@@ -18,6 +18,7 @@ httpc-test = "0.1.10"
 tracing = "0.1.41"
 tracing-log = "0.2.0"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+dotenv = "0.15.0"
 
 [dev-dependencies]
 assert_cmd = "2.0.14"
