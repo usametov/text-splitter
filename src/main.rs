@@ -86,7 +86,8 @@ fn validate_config(cfg: &config::Config) {
 #[tokio::main]
 async fn main() {
 
-  fmt().with_env_filter(EnvFilter::from_default_env()
+  fmt().with_writer(std::io::stdout) // Log to console
+       .with_env_filter(EnvFilter::from_default_env()
        .add_directive("text-splitter=info".parse().unwrap()))
        .init();
 
