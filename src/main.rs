@@ -48,7 +48,7 @@ async fn run(State(cfg): State<Arc<config::Config>>,
 
     match result {
       Ok(_) => Json(json!({ "result": { "success": true } })),
-      Err(e) => Json(json!({ "result": { "success": false, "error": e.to_string() } })),
+      Err(_) => Json(json!({ "result": { "success": false, "error": "processing error!" } })),
     }
 }
 
