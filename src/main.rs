@@ -124,7 +124,7 @@ async fn main() {
                , cfg.is_verbose, cfg.prfx_replacement.as_str()
                , cfg.strip_prefix.as_str());
     
-  };
+  }
      
 }
 
