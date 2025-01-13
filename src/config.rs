@@ -18,6 +18,12 @@ pub struct Config {
 
 pub fn get_args() -> Result<Config, Box<dyn Error>> { 
 
+    let min_char = std::env::var("MIN_CHAR")
+      .unwrap_or("200".to_string());
+
+    let max_char = std::env::var("MAX_CHAR")
+      .unwrap_or("500".to_string());   
+
     let matches = App::new("semantic splitter")
       .version("0.1")
       .author("Ulan Sametov <usametov@gmail.com>")
@@ -49,14 +55,14 @@ pub fn get_args() -> Result<Config, Box<dyn Error>> {
             .required(true)
             .min_values(1)
             .max_values(1)
-            .default_value("100"))
+            .default_value(min_char.as_str()))
       .arg(Arg::with_name("maxchar")                    
             .long("maxchar")
             .help("maximum chars in chunk")
             .required(true)
             .min_values(1)
             .max_values(1)
-            .default_value("500"))                        
+            .default_value(max_char.as_str()))                        
       .arg(Arg::with_name("verbose")
             .short("v")
             .long("verbose")
