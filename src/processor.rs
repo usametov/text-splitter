@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use text_splitter::TextSplitter;
 use tokenizers::Tokenizer;
-use tracing::{info, instrument};
+//use tracing::{info, instrument};
 use std::fs::File;
 use std::io::{self, Write};
 use std::path::Path;
@@ -19,13 +19,13 @@ fn get_chunks<'a>(splitter: &'a TextSplitter<Tokenizer>,
     let chunks = splitter.chunks(txt, max_characters);
     chunks
 }
-#[instrument(skip(splitter, input_path, output, new_extension, chunk_chars_range))]
+//#[instrument(skip(splitter, input_path, output, new_extension, chunk_chars_range))]
 fn process_file(splitter: &TextSplitter<Tokenizer>, 
                     input_path: &str, output: &str, new_extension: &str, 
                     chunk_chars_range: Range<usize>, is_verbose: bool, 
                     strp_prfx: &str, prfx_replacement: &str) -> io::Result<()> {
                       
-    info!("Processing file: {}", input_path);
+    //info!("Processing file: {}", input_path);
 
     if is_verbose {
       println!("processing file {}", &input_path);
@@ -82,7 +82,7 @@ fn get_src(strp_prfx: &str, prfx_replacement: &str, input_path: &str) -> String 
                   }    
 }
 
-#[instrument(skip(list_of_files, working_dir, output_dir, chunk_size_range, is_verbose, prfx_replacement, strip_prefix))]
+//#[instrument(skip(list_of_files, working_dir, output_dir, chunk_size_range, is_verbose, prfx_replacement, strip_prefix))]
 pub(crate) fn run(list_of_files: Vec<String>
     , working_dir: PathBuf
     , output_dir: &str
@@ -91,7 +91,7 @@ pub(crate) fn run(list_of_files: Vec<String>
     , prfx_replacement: &str
     , strip_prefix: &str) -> Result<(), anyhow::Error> {
 
-      info!("Starting processing of {} files", list_of_files.len());
+      //info!("Starting processing of {} files", list_of_files.len());
 
       let tokenizer = Tokenizer::from_pretrained("bert-base-cased", None).unwrap();  
       let splitter = TextSplitter::new(tokenizer)

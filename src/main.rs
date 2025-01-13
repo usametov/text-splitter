@@ -103,7 +103,7 @@ async fn main() {
   if cfg.web {
     // Create the Axum router
     let app = Router::new()
-                    .route("/v1/run", post(run))
+                    .route("/api/v1/run", post(run))
                     .with_state(Arc::new(cfg));
  
     let port = std::env::var("WEB_PORT")
