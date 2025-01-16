@@ -11,7 +11,7 @@ RUN apt update && apt install -y pkg-config libssl-dev g++ && rm -rf /var/lib/ap
 RUN cargo build --release 
 
 FROM gcr.io/distroless/cc-debian12
-COPY --from=build-env /app/target/release/text-splitter /text-splitter
+COPY --from=build-env /target/release/text-splitter /text-splitter
 
 # Run the binary
 CMD ["/text-splitter"]
