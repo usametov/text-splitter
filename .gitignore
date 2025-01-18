@@ -4,5 +4,5 @@ target
 
 .aider*
 tests/outputs/*
+tests/*
 
-.env

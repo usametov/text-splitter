@@ -12,6 +12,8 @@ RUN cargo build --release
 
 FROM gcr.io/distroless/cc-debian12
 COPY --from=build-env /target/release/text-splitter /text-splitter
+COPY --from=build-env /data/output /data/output
+COPY --from=build-env /.env /.env
 
 # Run the binary
 CMD ["/text-splitter"]

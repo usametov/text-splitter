@@ -112,7 +112,7 @@ async fn main() {
                       .expect("Invalid port number");
 
     // Start the Axum server  
-    let addr = SocketAddr::from(([127, 0, 0, 1], port));
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
 
     println!("->> LISTENING on {:?}\n", listener.local_addr());
