@@ -6,3 +6,5 @@ target
 tests/outputs/*
 tests/*
 
+*key.json
+
