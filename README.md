@@ -1,4 +1,4 @@
-Semantic Text Splitter.
+## Semantic Text Splitter.
 
 This program processes a group of text files and generates a collection of semantic chunks for each file in JSON format. This project is an extension of the work found at this [GitHub repository](https://github.com/benbrandt/text-splitter), which itself is based on another project documented [here](https://semantic-text-splitter.readthedocs.io/en/stable/semantic_text_splitter.html).
 
