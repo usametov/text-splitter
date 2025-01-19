@@ -40,6 +40,8 @@ To run web server in Docker:
 docker run -v /home/user777/code/rust/text-splitter/tests:/data <image-name> /target/release/text-splitter --minchar 200 --maxchar 500 --input-files nah --dir /data/inputs -o /data -w
 ```
 
+## GCP Cloud deployment steps
+
 Follow these steps to deploy this service to GCP cloud run:
 
 - Create project for our Cloud Run deployment, or reuse an existing one.
