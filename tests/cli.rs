@@ -6,10 +6,10 @@ use std::env;
 fn dies_no_args() {
 
     let mut cmd = Command::cargo_bin("text-splitter").unwrap();
+    //cmd.args(["--input-files", "./tests/inputs/files2process.txt", "--dir", "tests/inputs", "-o", "./tests/outputs"]);
     cmd.assert()
     .failure()
-    .stderr(predicate::str::contains("USAGE"));
-    
+    .stderr(predicate::str::contains("USAGE"));    
 }
 
 #[test]

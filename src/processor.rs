@@ -4,22 +4,48 @@ use std::path::PathBuf;
 
 use text_splitter::TextSplitter;
 use tokenizers::Tokenizer;
-//use tracing::{info, instrument};
+use tracing::{info, error, instrument, warn};
 use std::fs::File;
 use std::io::{self, Write};
 use std::path::Path;
 use serde_json::json;
 
-
-fn get_chunks<'a>(splitter: &'a TextSplitter<Tokenizer>, 
-                  max_characters: std::ops::Range<usize>, 
-                  txt: &'a str) -> impl Iterator<Item = &'a str> {
+#[instrument(skip(splitter, max_characters, txt))]
+fn get_chunks<'a>(
+    splitter: &'a TextSplitter<Tokenizer>,
+    max_characters: Range<usize>,
+    txt: &'a str
+) -> anyhow::Result<Box<dyn Iterator<Item = &'a str> + 'a>> {
+    info!(length = txt.len(), range = ?max_characters, "Splitting text");
     
-    // Optionally can also have the splitter trim whitespace for you    
-    let chunks = splitter.chunks(txt, max_characters);
-    chunks
+    if txt.is_empty() {
+        warn!("Empty text provided to get_chunks");
+        return Ok(Box::new(std::iter::empty()));
+    }
+
+    if max_characters.start >= max_characters.end {
+        error!(min = max_characters.start, max = max_characters.end, "Invalid chunk range");
+        return Err(anyhow::anyhow!("Invalid chunk range: {} >= {}", max_characters.start, max_characters.end));
+    }
+    
+    Ok(Box::new(splitter.chunks(txt, max_characters)))
 }
-//#[instrument(skip(splitter, input_path, output, new_extension, chunk_chars_range))]
+
+// fn get_chunks<'a>(splitter: &'a TextSplitter<Tokenizer>, 
+//                   max_characters: std::ops::Range<usize>, 
+//                   txt: &'a str) -> impl Iterator<Item = &'a str> {
+    
+//     // Optionally can also have the splitter trim whitespace for you    
+//     let chunks = splitter.chunks(txt, max_characters);
+//     chunks
+// }
+
+
+#[instrument(skip_all, fields(
+  input = %input_path,
+  output = output,
+  chunk_range = ?chunk_chars_range
+))]
 fn process_file(splitter: &TextSplitter<Tokenizer>, 
                     input_path: &str, output: &str, new_extension: &str, 
                     chunk_chars_range: Range<usize>, is_verbose: bool, 
@@ -43,9 +69,16 @@ fn process_file(splitter: &TextSplitter<Tokenizer>,
 
     let content = fs::read_to_string(input_path)?;
         
-    let _chunks = get_chunks(splitter, chunk_chars_range, &content);
-            
-    let chunks = _chunks.collect::<Vec<_>>();
+    let chunks = match get_chunks(splitter, chunk_chars_range, &content) {
+      Ok(c) => c,
+      Err(e) => {
+          error!("Failed to chunk file {}: {}", input_path, e);
+          return Err(io::Error::new(io::ErrorKind::Other, e));
+      }
+    }.collect::<Vec<_>>();
+
+    info!(chunk_count = chunks.len(), "Generated chunks");    
+    
     let mut json_objects = vec![];
 
     let src = get_src(strp_prfx, prfx_replacement, input_path);

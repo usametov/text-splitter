@@ -1,3 +1,5 @@
-eutxo.mdx
-example--vesting.mdx
-example--gift-card.mdx
+Upscaling_and_simulation_of_composite_ga.txt
+Guar_Gum_in_Hydraulic_Fracturing_in_Indi.txt
+Shale_Gas_An_Overview.txt
+Lacustrine_sediments_petroleum_deposits.txt
+The_Brief_Bibliometric_Analysis_of_the_T.txt
