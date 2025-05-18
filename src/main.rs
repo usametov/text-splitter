@@ -2,7 +2,7 @@ extern crate clap;
 
 mod config;
 mod processor;
-use tracing::{info, instrument /*, error */};
+use tracing::{info, instrument , error };
 use tracing_subscriber::{fmt, EnvFilter};
 
 use serde::Deserialize;
@@ -48,12 +48,21 @@ async fn run(State(cfg): State<Arc<config::Config>>,
 
     match result {
       Ok(_) => Json(json!({ "result": { "success": true } })),
-      Err(_) => Json(json!({ "result": { "success": false, "error": "processing error!" } })),
+      Err(e) => {
+          error!("Processing failed: {}", e);
+          Json(json!({ 
+              "result": { 
+                  "success": false, 
+                  "error": e.to_string() 
+              } 
+          }))
+      },
     }
 }
 
 fn validate_config(cfg: &config::Config) {
   // Validate chunk size range
+  info!("Validating config - min_chars: {}, max_chars: {}", cfg.min_chars, cfg.max_chars);
   assert!(cfg.min_chars < cfg.max_chars, "min_chars must be less than max_chars");
   
   // Validate working_dir

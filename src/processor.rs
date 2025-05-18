@@ -67,13 +67,28 @@ fn process_file(splitter: &TextSplitter<Tokenizer>,
     let output_path = output_dir.join(filename)
                                          .with_extension(new_extension);
 
-    let content = fs::read_to_string(input_path)?;
+    let content = fs::read_to_string(input_path).map_err(|e| {
+        error!("Failed to read file {}: {}", input_path, e);
+        io::Error::new(
+            io::ErrorKind::NotFound, 
+            format!("File {} not found or unreadable: {}", input_path, e)
+        )
+    })?;
         
-    let chunks = match get_chunks(splitter, chunk_chars_range, &content) {
+    let chunks = match get_chunks(splitter, chunk_chars_range.clone(), &content) {
       Ok(c) => c,
       Err(e) => {
-          error!("Failed to chunk file {}: {}", input_path, e);
-          return Err(io::Error::new(io::ErrorKind::Other, e));
+          error!(
+              "Failed to chunk file {} (size: {} bytes, range: {:?}): {}",
+              input_path,
+              content.len(),
+              chunk_chars_range,
+              e
+          );
+          return Err(io::Error::new(io::ErrorKind::Other, format!(
+              "Failed to chunk {}: {} (content length: {}, range: {:?})",
+              input_path, e, content.len(), chunk_chars_range
+          )));
       }
     }.collect::<Vec<_>>();
 
